@@ -18,10 +18,13 @@
 		 * Engage
 		 */
 		function init() {
-			Recommendations.getNextSongs()
+			Recommendations.init()
 				.then(function () {
 					// set current song to first one in retrieved queue
 					$scope.currentSong = Recommendations.queue[0];
+
+					// play song
+					Recommendations.playSong();
 				});
 		}
 
@@ -41,6 +44,9 @@
 			$timeout(function () {
 				$scope.currentSong = Recommendations.queue[0];
 			}, 250);
+
+			// next song loaded, play song
+			Recommendations.playSong();
 		}
 
 		/**
