@@ -4,11 +4,11 @@
 	angular.module('songhop.discover')
 		.controller('DiscoverCtrl', DiscoverCtrl);
 
-	DiscoverCtrl.$inject = ['$scope', '$timeout', 'User', 'Recommendations'];
+	DiscoverCtrl.$inject = ['$scope', '$timeout', 'User', 'Recommendations', '$ionicLoading'];
 
-	function DiscoverCtrl($scope, $timeout, User, Recommendations) {
+	function DiscoverCtrl($scope, $timeout, User, Recommendations, $ionicLoading) {
 
-		$scope.currentSong = {};
+		$scope.currentSong = { loaded: false };
 		$scope.sendFeedback = sendFeedback;
 		$scope.nextAlbumImg = nextAlbumImg;
 
@@ -18,14 +18,36 @@
 		 * Engage
 		 */
 		function init() {
+			showLoading();
+
 			Recommendations.init()
 				.then(function () {
 					// set current song to first one in retrieved queue
 					$scope.currentSong = Recommendations.queue[0];
 
 					// play song
-					Recommendations.playSong();
+					Recommendations.playSong().then(function () {
+						hideLoading();
+						$scope.currentSong.loaded = true;
+					});
 				});
+		}
+
+		/**
+		 * Display loading spinner
+		 */
+		function showLoading() {
+			$ionicLoading.show({
+				template: '<i class="ion-loading-c"></i>',
+				noBackdrop: true
+			});
+		}
+
+		/**
+		 * Hide loading spinner
+		 */
+		function hideLoading() {
+			$ionicLoading.hide();
 		}
 
 		/**
@@ -43,10 +65,13 @@
 
 			$timeout(function () {
 				$scope.currentSong = Recommendations.queue[0];
+				$scope.currentSong.loaded = false;
 			}, 250);
 
 			// next song loaded, play song
-			Recommendations.playSong();
+			Recommendations.playSong().then(function () {
+				$scope.currentSong.loaded = true;
+			});
 		}
 
 		/**
